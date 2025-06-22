@@ -57,21 +57,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const decoded = decodeJWT(storedToken);
       if (decoded && decoded.exp * 1000 > Date.now()) {
         setToken(storedToken);
-        // Set up axios default header
         axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
-        
-        // Extract user info from token
         const userInfo: User = {
           id: decoded.sub || 'user@example.com',
           email: decoded.sub || 'user@example.com',
           fullName: decoded.name || 'User',
-          role: decoded.role || 'USER'
+          role: (decoded.role || 'USER') as 'USER' | 'EMPLOYEE'
         };
         setUser(userInfo);
       } else {
-        // Token expired
+        // Token expired or invalid
         localStorage.removeItem(config.JWT_STORAGE_KEY);
+        setToken(null);
+        setUser(null);
+        delete axios.defaults.headers.common['Authorization'];
       }
+    } else {
+      setToken(null);
+      setUser(null);
+      delete axios.defaults.headers.common['Authorization'];
     }
     setIsLoading(false);
   }, []);
@@ -109,7 +113,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         id: decoded.sub || email,
         email: decoded.sub || email,
         fullName: decoded.name || email,
-        role: decoded.role || 'USER'
+        role: (decoded.role || 'USER') as 'USER' | 'EMPLOYEE'
       };
       
       console.log('Setting user:', userInfo);

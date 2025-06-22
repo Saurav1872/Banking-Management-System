@@ -1,6 +1,6 @@
 "use client";
-import { useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useRef } from 'react';
+import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -9,32 +9,41 @@ interface ProtectedRouteProps {
   redirectTo?: string;
 }
 
-export default function ProtectedRoute({ 
-  children, 
-  allowedRoles = ['USER', 'EMPLOYEE'], 
-  redirectTo = '/' 
+export default function ProtectedRoute({
+  children,
+  allowedRoles = ['USER', 'EMPLOYEE'],
+  redirectTo = '/'
 }: ProtectedRouteProps) {
   const { user, isAuthenticated, isLoading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!isLoading) {
-      if (!isAuthenticated) {
-        router.push(redirectTo);
-        return;
-      }
+    if (isLoading) return;
+    if (hasRedirected.current) return;
 
-      if (user && !allowedRoles.includes(user.role)) {
-        // Redirect based on user role
-        if (user.role === 'EMPLOYEE') {
-          router.push('/employee-dashboard');
-        } else {
-          router.push('/user-dashboard');
-        }
-        return;
+    // Not authenticated: redirect to login/home
+    if (!isAuthenticated) {
+      if (pathname !== redirectTo) {
+        hasRedirected.current = true;
+        router.replace(redirectTo);
       }
+      return;
     }
-  }, [isAuthenticated, user, isLoading, allowedRoles, redirectTo, router]);
+
+    // Authenticated but not allowed: redirect to correct dashboard
+    if (user && !allowedRoles.includes(user.role)) {
+      if (user.role === 'EMPLOYEE' && pathname !== '/employee-dashboard') {
+        hasRedirected.current = true;
+        router.replace('/employee-dashboard');
+      } else if (user.role === 'USER' && pathname !== '/user-dashboard') {
+        hasRedirected.current = true;
+        router.replace('/user-dashboard');
+      }
+      return;
+    }
+  }, [isAuthenticated, user, isLoading, allowedRoles, redirectTo, router, pathname]);
 
   if (isLoading) {
     return (
@@ -47,13 +56,11 @@ export default function ProtectedRoute({
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
+  // Only render children if authenticated and allowed
+  if (isAuthenticated && user && allowedRoles.includes(user.role)) {
+    return <>{children}</>;
   }
 
-  if (user && !allowedRoles.includes(user.role)) {
-    return null;
-  }
-
-  return <>{children}</>;
-} 
+  // Otherwise, show a blank screen while redirecting
+  return <div className="min-h-screen bg-gray-100" />;
+}

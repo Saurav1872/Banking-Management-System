@@ -105,6 +105,8 @@ export interface SystemStats {
   totalUsers: number;
   totalAccounts: number;
   totalTransactions: number;
+  activeUsers: number;
+  totalBalance: number;
   // Add other fields as needed
 }
 
@@ -198,7 +200,7 @@ export const employeeAPI = {
   getSystemStats: async (): Promise<{ data?: SystemStats; error?: string }> => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`${config.API_BASE_URL}/api/employee/stats`, {
+      const response = await axios.get(`${config.API_BASE_URL}/employee/stats`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -244,7 +246,7 @@ export const applicationAPI = {
 export const getTransactions = async (): Promise<TransactionResponse> => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${config.API_BASE_URL}/api/employee/transactions`, {
+    const response = await axios.get(`${config.API_BASE_URL}/employee/transactions`, {
       headers: {
         'Authorization': `Bearer ${token}`
       }
@@ -259,7 +261,7 @@ export const getTransactions = async (): Promise<TransactionResponse> => {
 export const searchTransactions = async (searchParams: any): Promise<TransactionResponse> => {
   try {
     const token = localStorage.getItem('token');
-    const response = await axios.get(`${config.API_BASE_URL}/api/employee/transactions/search`, {
+    const response = await axios.get(`${config.API_BASE_URL}/employee/transactions/search`, {
       headers: {
         'Authorization': `Bearer ${token}`
       },
