@@ -55,8 +55,8 @@ public class JwtTokenProvider {
         claims.put("name", userDetails.getUsername()); // For now, use username as name
         claims.put("role", userDetails.getAuthorities().stream()
                 .findFirst()
-                .map(authority -> authority.getAuthority())
-                .orElse("ROLE_USER"));
+                .map(authority -> authority.getAuthority().replace("ROLE_", ""))
+                .orElse("USER"));
         // We'll add user ID later when we can inject UserRepository
 
         return Jwts.builder()
