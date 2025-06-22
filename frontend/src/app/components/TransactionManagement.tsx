@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { getTransactions, searchTransactions } from '../services/api';
+import type { TransactionResponse } from '../services/api';
 
 interface Transaction {
   id: number;
@@ -27,8 +28,8 @@ export default function TransactionManagement() {
     try {
       setLoading(true);
       const response = await getTransactions();
-      if (response.success) {
-        setTransactions(response.data || []);
+      if ((response as TransactionResponse).success) {
+        setTransactions((response as TransactionResponse).data || []);
       }
     } catch (error) {
       console.error('Error loading transactions:', error);
@@ -64,8 +65,8 @@ export default function TransactionManagement() {
       }
 
       const response = await searchTransactions(searchParams);
-      if (response.success) {
-        setTransactions(response.data || []);
+      if ((response as TransactionResponse).success) {
+        setTransactions((response as TransactionResponse).data || []);
       }
     } catch (error) {
       console.error('Error searching transactions:', error);

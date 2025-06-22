@@ -43,6 +43,7 @@ export interface Transaction {
   fromAccount?: string;
   toAccount?: string;
   timestamp: string;
+  accountId: number;
 }
 
 export interface TransferRequest {
@@ -92,6 +93,12 @@ export interface ApplicationDecisionRequest {
   applicationId: number;
   decision: 'APPROVED' | 'REJECTED';
   notes: string;
+}
+
+export interface TransactionResponse {
+  success: boolean;
+  data?: Transaction[];
+  message?: string;
 }
 
 // Auth API
@@ -214,7 +221,7 @@ export const applicationAPI = {
 };
 
 // Transaction Management APIs
-export const getTransactions = async () => {
+export const getTransactions = async (): Promise<TransactionResponse> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${config.API_BASE_URL}/api/employee/transactions`, {
@@ -222,14 +229,14 @@ export const getTransactions = async () => {
         'Authorization': `Bearer ${token}`
       }
     });
-    return response.data;
+    return response.data as TransactionResponse;
   } catch (error) {
     console.error('Error fetching transactions:', error);
-    throw error;
+    return { success: false, data: [], message: 'Error fetching transactions' };
   }
 };
 
-export const searchTransactions = async (searchParams: any) => {
+export const searchTransactions = async (searchParams: any): Promise<TransactionResponse> => {
   try {
     const token = localStorage.getItem('token');
     const response = await axios.get(`${config.API_BASE_URL}/api/employee/transactions/search`, {
@@ -238,9 +245,9 @@ export const searchTransactions = async (searchParams: any) => {
       },
       params: searchParams
     });
-    return response.data;
+    return response.data as TransactionResponse;
   } catch (error) {
     console.error('Error searching transactions:', error);
-    throw error;
+    return { success: false, data: [], message: 'Error searching transactions' };
   }
-}; 
+};
