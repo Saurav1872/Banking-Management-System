@@ -101,6 +101,13 @@ export interface TransactionResponse {
   message?: string;
 }
 
+export interface SystemStats {
+  totalUsers: number;
+  totalAccounts: number;
+  totalTransactions: number;
+  // Add other fields as needed
+}
+
 // Auth API
 export const authAPI = {
   login: (email: string, password: string) =>
@@ -188,7 +195,20 @@ export const notificationAPI = {
 
 // Employee API
 export const employeeAPI = {
-  getSystemStats: () => axios.get(getApiUrl(`${config.ENDPOINTS.EMPLOYEE}/stats`)),
+  getSystemStats: async (): Promise<{ data?: SystemStats; error?: string }> => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`${config.API_BASE_URL}/api/employee/stats`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      return { data: response.data as SystemStats };
+    } catch (error: any) {
+      console.error('Error fetching system stats:', error);
+      return { error: error.message || 'Network error' };
+    }
+  },
   
   getAllAccounts: () => axios.get<Account[]>(getApiUrl(`${config.ENDPOINTS.EMPLOYEE}/accounts`)),
   

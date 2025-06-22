@@ -1,7 +1,7 @@
 // Environment Configuration
 export const config = {
   // Backend Server Configuration
-  API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://banking-system-463708.as.r.appspot.com/',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL || 'https://banking-system-463708.as.r.appspot.com/api',
   
   // JWT Configuration
   JWT_STORAGE_KEY: process.env.NEXT_PUBLIC_JWT_STORAGE_KEY || 'bank_jwt',
